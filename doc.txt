@@ -1,0 +1,16 @@
+Formato de resposta de erro
+
+{
+    "timestamp": "2020-12-21T13:26:55.756+00:00",
+    "status": 400,
+    "error": "Bad Request",
+    "message": "",
+    "path": "/users",
+    "errors": [
+		"field": "firstName",
+		"message": "Por favor, informe o seu primeiro nome"
+	]
+}
+
+
+Toda resposta deve ser no formato Mono ou Flux
