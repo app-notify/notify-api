@@ -22,9 +22,11 @@ public class User {
     private String firstName;
     @NotBlank(message = "{lastName.not.blank}")
     private String lastName;
+    @Pattern(regexp = "^(\\w){3,20}\\b", message = "{userName.regexp}")
     private String userName;
     @Email(message = "{email.address}")
     private String email;
+    @Pattern(regexp = "^(\\d){11,20}\\b", message = "{phone.regexp}")
     private String phone;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     @JsonDeserialize(using = LocalDateDeserializer.class)
