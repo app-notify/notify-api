@@ -2,15 +2,20 @@ package com.github.lbovolini.notify;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.web.servlet.LocaleResolver;
-import org.springframework.web.servlet.i18n.SessionLocaleResolver;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
 
+import javax.validation.Validator;
 import java.util.Locale;
 
+// !todo mover beans
 @SpringBootApplication
 public class NotifyApplication {
 
@@ -22,7 +27,9 @@ public class NotifyApplication {
 	public MessageSource messageSource() {
 		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
 
+		// !todo
 		messageSource.setBasename("classpath:lang/messages");
+		//messageSource.setUseCodeAsDefaultMessage(true);
 		messageSource.setDefaultEncoding("UTF-8");
 
 		return messageSource;
@@ -37,11 +44,21 @@ public class NotifyApplication {
 	}
 
 	@Bean
-	public LocaleResolver localeResolver() {
-		SessionLocaleResolver localeResolver = new SessionLocaleResolver();
-		localeResolver.setDefaultLocale(Locale.forLanguageTag("pt-BR"));
+	public HttpHandler httpHandler(ApplicationContext context) {
 
-		return localeResolver;
+		AcceptHeaderLocaleContextResolver localeContextResolver = new AcceptHeaderLocaleContextResolver();
+		// !todo mudar pra en
+		localeContextResolver.setDefaultLocale(Locale.forLanguageTag("pt-BR"));
+
+		return WebHttpHandlerBuilder.applicationContext(context)
+				.localeContextResolver(localeContextResolver)
+				.build();
+	}
+
+	@Bean
+	@Primary
+	public Validator springValidator() {
+		return getValidator();
 	}
 
 }
