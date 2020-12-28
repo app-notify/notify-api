@@ -18,21 +18,21 @@ public class User {
 
     @Id
     private String id;
-    @NotBlank(message = "{firstName.not.blank}")
+    @NotBlank(message = "{NotBlank.user.firstName}")
     private String firstName;
-    @NotBlank(message = "{lastName.not.blank}")
+    @NotBlank(message = "{NotBlank.user.lastName}")
     private String lastName;
-    @Pattern(regexp = "^(\\w){3,20}\\b", message = "{userName.regexp}")
+    @Pattern(regexp = "^(\\w){3,20}\\b", message = "{Pattern.user.userName}")
     private String userName;
-    @Email(message = "{email.address}")
+    @Email(message = "{Email.user.email}")
     private String email;
-    @Pattern(regexp = "^(\\d){11,20}\\b", message = "{phone.regexp}")
+    @Pattern(regexp = "^(\\d){11,20}\\b", message = "{Pattern.user.phone}")
     private String phone;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate birthday;
-    @Pattern(regexp = "^(?=.*[\\d])(?=.*[a-z])[\\w!@#$%^&*()-=+,.;:]{8,}$", message = "{password.regexp}")
+    @Pattern(regexp = "^(?=.*[\\d])(?=.*[a-z])[\\w!@#$%^&*()-=+,.;:]{8,}$", message = "{Pattern.user.password}")
     private String password;
 
     public String getId() {
