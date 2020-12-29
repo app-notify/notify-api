@@ -6,8 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
-import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
@@ -20,10 +19,12 @@ public class RouterConfig {
         this.userHandler = userHandler;
     }
 
-
     @Bean
     public RouterFunction<ServerResponse> userRouter() {
         return route(POST("/users"), userHandler::save)
-                .andRoute(GET("/users"), userHandler::findAll);
+                .andRoute(GET("/users"), userHandler::findAll)
+                .andRoute(DELETE("/users/{id}"), userHandler::delete)
+                .andRoute(GET("/users/{id}"), userHandler::find)
+                .andRoute(POST("/users/{id}"), userHandler::update);
     }
 }
