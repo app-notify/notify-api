@@ -7,11 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Validator;
 
-import static org.springframework.web.reactive.function.BodyInserters.fromPublisher;
+import java.net.URI;
+
+import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
 @Component
 public class UserHandler extends AbstractValidationHandler<User, Validator> {
@@ -24,18 +27,61 @@ public class UserHandler extends AbstractValidationHandler<User, Validator> {
         this.userService = userService;
     }
 
-    public Mono<ServerResponse> save(ServerRequest request) {
+    /**
+     *
+     * @param request
+     * @return
+     * @throws IllegalArgumentException - if there is no path variable with the given name
+     */
+    public Mono<ServerResponse> delete(ServerRequest request) {
 
-        Mono<User> userMono = request.bodyToMono(User.class).doOnNext(this::validate);
+        return Mono.just(request.pathVariable("id"))
+                .flatMap(userService::delete)
+                .flatMap(voidz -> ServerResponse.noContent().build());
+    }
 
-        return userMono.flatMap(user -> {
-            Mono<User> savedUserMono = userService.save(user);
-            return ServerResponse.ok().build();
-        });
+    /**
+     *
+     * @param request
+     * @return
+     * @throws IllegalArgumentException - if there is no path variable with the given name
+     */
+    public Mono<ServerResponse> find(ServerRequest request) {
+
+        return Mono.just(request.pathVariable("id"))
+                .flatMap(userService::find)
+                .flatMap(ServerResponse.ok()::bodyValue);
     }
 
     public Mono<ServerResponse> findAll(ServerRequest request) {
-        return ServerResponse.ok().body(fromPublisher(userService.findAll(), User.class));
+
+        Flux<User> allUsersFlux = userService.findAll();
+
+        return ServerResponse.ok().body(allUsersFlux, User.class);
+    }
+
+    // !todo 409 conflict
+    public Mono<ServerResponse> save(ServerRequest request) {
+
+        return request.bodyToMono(User.class)
+                .doOnNext(this::validate)
+                .flatMap(userService::save)
+                .flatMap(savedUser -> ServerResponse.created(getLocation(request, savedUser)).build());
+    }
+
+    // !todo will flatMap calls be skipped if Mono is empty?
+    public Mono<ServerResponse> update(ServerRequest request) {
+
+        return request.bodyToMono(User.class)
+                .doOnNext(this::validate)
+                .flatMap(user -> userService.find(user.getId()))
+                .flatMap(userService::update)
+                .flatMap(updatedUser -> ServerResponse.ok().body(fromValue(updatedUser)))
+                .switchIfEmpty(ServerResponse.notFound().build());
+    }
+
+    private URI getLocation(ServerRequest request, User savedUser) {
+        return URI.create(request.path() + "/" + savedUser.getId());
     }
 
 }
